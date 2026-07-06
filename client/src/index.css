@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #2d2d2d;
+  color: white;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #ccc;
+}
