@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signupUser, clearError } from '../store/authSlice';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -17,7 +18,12 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(signupUser(form));
-    if (!result.error) navigate('/');
+    if (!result.error) {
+      toast.success('Account created successfully');
+      navigate('/');
+    } else {
+      toast.error(result.payload?.message || 'Signup failed');
+    }
   };
 
   return (

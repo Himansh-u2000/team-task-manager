@@ -29,11 +29,13 @@ import TaskCard from '../components/TaskCard';
 import {
   ArrowLeft,
   Plus,
+  Search,
+  MoreVertical,
+  Clock,
   Trash2,
-  UserPlus,
-  X,
-  Users,
+  AlertCircle
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 function KanbanColumn({
   column,
@@ -165,8 +167,10 @@ export default function ProjectDetail() {
       setShowTaskModal(false);
       setTaskForm({ title: '', description: '', assignedTo: '', priority: 'medium', dueDate: '' });
       fetchTasks();
+      toast.success('Task created successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create task');
+      toast.error(err.response?.data?.message || 'Failed to create task');
     }
   };
 

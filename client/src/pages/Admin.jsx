@@ -15,12 +15,14 @@ import {
 import {
   CheckCircle2,
   FolderKanban,
+  ListTodo,
   Plus,
   Settings2,
   Trash2,
   UserPlus,
   Users,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Admin() {
   const [projects, setProjects] = useState([]);
@@ -186,8 +188,10 @@ export default function Admin() {
       });
       await Promise.all([fetchProjects(selectedProjectId), fetchSelectedProjectData(selectedProjectId)]);
       setNotice('Task assigned successfully');
+      toast.success('Task created successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to assign task');
+      toast.error(err.response?.data?.message || 'Failed to create task');
     } finally {
       setCreatingTask(false);
     }

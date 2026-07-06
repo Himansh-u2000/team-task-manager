@@ -38,7 +38,7 @@ A full-stack collaborative task management web application built with React, Nod
 ### 1. Clone the repo
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Himansh-u2000/team-task-manager.git
 cd team-task-manager
 ```
 

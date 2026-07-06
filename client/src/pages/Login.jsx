@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../store/authSlice';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -17,7 +18,12 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginUser(form));
-    if (!result.error) navigate('/');
+    if (!result.error) {
+      toast.success('Logged in successfully');
+      navigate('/');
+    } else {
+      toast.error(result.payload?.message || 'Login failed');
+    }
   };
 
   return (

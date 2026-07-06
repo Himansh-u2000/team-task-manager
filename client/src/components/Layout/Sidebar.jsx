@@ -1,3 +1,4 @@
+
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,10 +15,9 @@ export default function Sidebar({ open, onClose }) {
   const { user } = useSelector((state) => state.auth);
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors ${
-      isActive
-        ? 'bg-[#2d2d2d] text-white font-medium'
-        : 'text-[#666] hover:bg-[#f0eeeb] hover:text-[#2d2d2d]'
+    `flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors ${isActive
+      ? 'bg-[#2d2d2d] text-white font-medium'
+      : 'text-[#666] hover:bg-[#f0eeeb] hover:text-[#2d2d2d]'
     }`;
 
   return (
@@ -30,9 +30,8 @@ export default function Sidebar({ open, onClose }) {
       )}
 
       <aside
-        className={`fixed top-14 left-0 z-50 w-56 h-[calc(100vh-3.5rem)] bg-[#faf9f7] border-r border-[#e8e5e0] transition-transform lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-14 left-0 z-50 w-56 h-[calc(100vh-3.5rem)] bg-[#faf9f7] border-r border-[#e8e5e0] transition-transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex items-center justify-between p-3 lg:hidden">
           <span className="font-medium text-[13px] text-[#2d2d2d]">Menu</span>

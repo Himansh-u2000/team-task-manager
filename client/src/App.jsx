@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/authSlice";
+import { Toaster } from "react-hot-toast";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout/Layout";
@@ -33,8 +34,10 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      {/* Public */}
+    <>
+      <Toaster position="top-right" />
+      <Routes>
+        {/* Public */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
@@ -71,6 +74,7 @@ export default function App() {
           <a href="/" className="text-[13px] text-[#2d2d2d] underline hover:no-underline">Go back home</a>
         </div>
       } />
-    </Routes>
+      </Routes>
+    </>
   );
 }
