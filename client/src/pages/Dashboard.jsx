@@ -15,6 +15,67 @@ import {
 const STATUS_COLORS = ['#2d2d2d', '#eab308', '#22c55e'];
 const PRIORITY_COLORS = ['#22c55e', '#eab308', '#ef4444'];
 
+function SkeletonBlock({ className }) {
+  return <div className={`bg-[#f0eeeb] rounded animate-pulse ${className}`} />;
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-5">
+      <div>
+        <SkeletonBlock className="h-6 w-36 mb-1.5" />
+        <SkeletonBlock className="h-3.5 w-52" />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <SkeletonBlock className="h-3 w-20 mb-2" />
+                <SkeletonBlock className="h-6 w-12" />
+              </div>
+              <SkeletonBlock className="p-2.5 rounded-md w-10 h-10" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+          <SkeletonBlock className="h-4 w-16 mb-3" />
+          <SkeletonBlock className="h-60 w-full" />
+        </div>
+        <div className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+          <SkeletonBlock className="h-4 w-32 mb-3" />
+          <SkeletonBlock className="h-60 w-full" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+          <SkeletonBlock className="h-4 w-16 mb-3" />
+          <SkeletonBlock className="h-44 w-full" />
+        </div>
+        <div className="lg:col-span-2 bg-white rounded-lg border border-[#e8e5e0] p-4">
+          <SkeletonBlock className="h-4 w-28 mb-3" />
+          <div className="space-y-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-2.5 bg-[#faf9f7] rounded-md border border-[#f0eeeb]">
+                <div className="min-w-0 flex-1">
+                  <SkeletonBlock className="h-3.5 w-48 mb-1.5" />
+                  <SkeletonBlock className="h-2.5 w-32" />
+                </div>
+                <SkeletonBlock className="ml-3 shrink-0 h-5 w-16 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,16 +83,12 @@ export default function Dashboard() {
   useEffect(() => {
     getDashboardStats()
       .then((res) => setStats(res.data.stats))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!stats) {
@@ -156,13 +213,12 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span
-                    className={`ml-3 shrink-0 px-2 py-0.5 rounded text-[11px] font-medium ${
-                      task.status === 'done'
+                    className={`ml-3 shrink-0 px-2 py-0.5 rounded text-[11px] font-medium ${task.status === 'done'
                         ? 'bg-[#dcfce7] text-[#16a34a]'
                         : task.status === 'in_progress'
-                        ? 'bg-[#fef9c3] text-[#ca8a04]'
-                        : 'bg-[#f0eeeb] text-[#888]'
-                    }`}
+                          ? 'bg-[#fef9c3] text-[#ca8a04]'
+                          : 'bg-[#f0eeeb] text-[#888]'
+                      }`}
                   >
                     {task.status === 'in_progress'
                       ? 'In Progress'

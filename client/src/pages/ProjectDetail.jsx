@@ -1,41 +1,39 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import {
+  closestCorners,
   DndContext,
   DragOverlay,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
-  closestCorners,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
-import {
-  getProject,
-  getProjectTasks,
-  createTask,
-  deleteTask,
-  updateTaskStatus,
-  addMember,
-  removeMember,
-  deleteProject,
-  getAllUsers,
-} from '../services/api';
-import TaskCard from '../components/TaskCard';
 import {
   ArrowLeft,
   Plus,
-  Search,
-  MoreVertical,
-  Clock,
   Trash2,
-  AlertCircle
+  Users,
+  X
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import TaskCard from '../components/TaskCard';
+import {
+  addMember,
+  createTask,
+  deleteProject,
+  deleteTask,
+  getAllUsers,
+  getProject,
+  getProjectTasks,
+  removeMember,
+  updateTaskStatus,
+} from '../services/api';
 
 function KanbanColumn({
   column,
@@ -50,9 +48,8 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg border-t-2 ${column.color} transition-colors ${
-        isOver ? 'bg-[#f0eeeb]' : 'bg-[#faf9f7]'
-      }`}
+      className={`rounded-lg border-t-2 ${column.color} transition-colors ${isOver ? 'bg-[#f0eeeb]' : 'bg-[#faf9f7]'
+        }`}
     >
       <div className="flex items-center justify-between mb-3 px-1 pt-2">
         <h3 className="text-[12px] font-semibold text-[#666] uppercase tracking-wider">
@@ -74,14 +71,14 @@ function KanbanColumn({
                 isAdmin || task.assignedTo?._id === currentUserId;
 
               return (
-            <TaskCard
-              key={task._id}
-              task={task}
-              onStatusChange={onStatusChange}
-              onDelete={onDelete}
-              canChangeStatus={canManageStatus}
-              sortableDisabled={!canManageStatus}
-            />
+                <TaskCard
+                  key={task._id}
+                  task={task}
+                  onStatusChange={onStatusChange}
+                  onDelete={onDelete}
+                  canChangeStatus={canManageStatus}
+                  sortableDisabled={!canManageStatus}
+                />
               );
             })()
           ))}
@@ -136,13 +133,13 @@ export default function ProjectDetail() {
   const fetchTasks = () => {
     return getProjectTasks(id)
       .then((res) => setTasks(res.data.tasks))
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const fetchUsers = () => {
     return getAllUsers()
       .then((res) => setUsers(res.data.users))
-      .catch(() => {});
+      .catch(() => { });
   };
 
   useEffect(() => {
@@ -175,11 +172,20 @@ export default function ProjectDetail() {
   };
 
   const handleStatusChange = async (taskId, status) => {
+    const originalTask = tasks.find((t) => t._id === taskId);
+    const originalStatus = originalTask?.status;
+
+    setTasks((prev) =>
+      prev.map((t) => (t._id === taskId ? { ...t, status } : t))
+    );
+
     try {
       await updateTaskStatus(taskId, status);
-      fetchTasks();
     } catch (err) {
-      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to update task status');
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? { ...t, status: originalStatus } : t))
+      );
     }
   };
 
@@ -271,7 +277,7 @@ export default function ProjectDetail() {
         prev.map((t) => (t._id === active.id ? { ...t, status: targetStatus } : t))
       );
     } catch (err) {
-      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to update task status');
       setTasks((prev) =>
         prev.map((t) => (t._id === active.id ? { ...t, status: originalStatus } : t))
       );

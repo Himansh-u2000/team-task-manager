@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getMyTasks, updateTaskStatus } from '../services/api';
 import TaskCard from '../components/TaskCard';
 import { CheckSquare, Filter } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function MyTasks() {
   const [tasks, setTasks] = useState([]);
@@ -25,11 +26,20 @@ export default function MyTasks() {
   }, [statusFilter, priorityFilter]);
 
   const handleStatusChange = async (taskId, status) => {
+    const originalTask = tasks.find((t) => t._id === taskId);
+    const originalStatus = originalTask?.status;
+
+    setTasks((prev) =>
+      prev.map((t) => (t._id === taskId ? { ...t, status } : t))
+    );
+
     try {
       await updateTaskStatus(taskId, status);
-      fetchTasks();
     } catch (err) {
-      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to update task status');
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? { ...t, status: originalStatus } : t))
+      );
     }
   };
 
