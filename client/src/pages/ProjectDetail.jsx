@@ -15,14 +15,16 @@ import {
   ArrowLeft,
   Plus,
   Trash2,
+  UserPlus,
   Users,
   X
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import TaskCard from '../components/TaskCard';
+import { SkeletonBlock } from '../components/Skeleton';
 import {
   addMember,
   createTask,
@@ -115,6 +117,8 @@ export default function ProjectDetail() {
     priority: 'medium',
     dueDate: '',
   });
+  const [creatingTask, setCreatingTask] = useState(false);
+  const taskSubmitting = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -158,7 +162,10 @@ export default function ProjectDetail() {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
+    if (taskSubmitting.current) return;
     setError('');
+    taskSubmitting.current = true;
+    setCreatingTask(true);
     try {
       await createTask({ ...taskForm, project: id });
       setShowTaskModal(false);
@@ -168,6 +175,9 @@ export default function ProjectDetail() {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create task');
       toast.error(err.response?.data?.message || 'Failed to create task');
+    } finally {
+      taskSubmitting.current = false;
+      setCreatingTask(false);
     }
   };
 
@@ -321,8 +331,48 @@ export default function ProjectDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <SkeletonBlock className="w-8 h-8 rounded-md" />
+            <div>
+              <SkeletonBlock className="h-5 w-48 mb-1.5" />
+              <SkeletonBlock className="h-3 w-64" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <SkeletonBlock className="h-8 w-24 rounded-md" />
+            <SkeletonBlock className="h-8 w-20 rounded-md" />
+          </div>
+        </div>
+        <div className="flex gap-1.5">
+          {[...Array(3)].map((_, i) => (
+            <SkeletonBlock key={i} className="h-6 w-20 rounded" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {['To Do', 'In Progress', 'Done'].map((label) => (
+            <div key={label} className="rounded-lg border-t-2 border-[#e8e5e0] bg-[#faf9f7] p-3">
+              <div className="flex items-center justify-between mb-3">
+                <SkeletonBlock className="h-3 w-20" />
+                <SkeletonBlock className="w-6 h-5 rounded" />
+              </div>
+              <div className="space-y-2">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-md border border-[#e8e5e0] p-3">
+                    <div className="flex items-start gap-2 mb-2">
+                      <SkeletonBlock className="w-3 h-3 shrink-0 mt-0.5" />
+                      <SkeletonBlock className="h-3.5 flex-1" />
+                      <SkeletonBlock className="w-12 h-4 shrink-0 rounded" />
+                    </div>
+                    <SkeletonBlock className="h-2.5 w-24 mb-2 ml-5" />
+                    <SkeletonBlock className="h-2 w-16 ml-5" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -509,9 +559,10 @@ export default function ProjectDetail() {
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 text-[13px] font-medium text-white bg-[#2d2d2d] rounded-md hover:bg-[#1a1a1a] transition-colors"
+                disabled={creatingTask}
+                className="w-full py-2 px-4 text-[13px] font-medium text-white bg-[#2d2d2d] rounded-md hover:bg-[#1a1a1a] disabled:opacity-50 transition-colors"
               >
-                Create
+                {creatingTask ? 'Creating...' : 'Create'}
               </button>
             </form>
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   addMember,
@@ -23,6 +23,7 @@ import {
   Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { SkeletonBlock, SkeletonListItem } from '../components/Skeleton';
 
 export default function Admin() {
   const [projects, setProjects] = useState([]);
@@ -47,6 +48,9 @@ export default function Admin() {
     dueDate: '',
   });
   const [memberToAdd, setMemberToAdd] = useState('');
+  const taskSubmitting = useRef(false);
+  const projectSubmitting = useRef(false);
+  const memberSubmitting = useRef(false);
 
   const fetchProjects = async (preferredProjectId = selectedProjectId) => {
     const res = await getProjects();
@@ -122,7 +126,9 @@ export default function Admin() {
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
+    if (projectSubmitting.current) return;
     clearMessages();
+    projectSubmitting.current = true;
     setCreatingProject(true);
 
     try {
@@ -133,14 +139,16 @@ export default function Admin() {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create project');
     } finally {
+      projectSubmitting.current = false;
       setCreatingProject(false);
     }
   };
 
   const handleAddMember = async () => {
-    if (!selectedProjectId || !memberToAdd) return;
+    if (!selectedProjectId || !memberToAdd || memberSubmitting.current) return;
 
     clearMessages();
+    memberSubmitting.current = true;
     setAddingMember(true);
 
     try {
@@ -151,6 +159,7 @@ export default function Admin() {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add member');
     } finally {
+      memberSubmitting.current = false;
       setAddingMember(false);
     }
   };
@@ -169,9 +178,10 @@ export default function Admin() {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
-    if (!selectedProjectId) return;
+    if (!selectedProjectId || taskSubmitting.current) return;
 
     clearMessages();
+    taskSubmitting.current = true;
     setCreatingTask(true);
 
     try {
@@ -193,6 +203,7 @@ export default function Admin() {
       setError(err.response?.data?.message || 'Failed to assign task');
       toast.error(err.response?.data?.message || 'Failed to create task');
     } finally {
+      taskSubmitting.current = false;
       setCreatingTask(false);
     }
   };
@@ -226,8 +237,75 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-5">
+        <div>
+          <SkeletonBlock className="h-6 w-24 mb-1.5" />
+          <SkeletonBlock className="h-3.5 w-64" />
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-4">
+          <section className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+            <SkeletonBlock className="h-4 w-24 mb-3" />
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="rounded-lg border border-[#e8e5e0] p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <SkeletonBlock className="h-4 w-48 mb-1.5" />
+                      <SkeletonBlock className="h-3 w-32" />
+                    </div>
+                    <SkeletonBlock className="w-16 h-7 shrink-0 rounded" />
+                  </div>
+                  <div className="flex gap-4 mt-3">
+                    <SkeletonBlock className="h-3 w-20" />
+                    <SkeletonBlock className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+            <SkeletonBlock className="h-4 w-32 mb-3" />
+            <div className="space-y-3">
+              <SkeletonBlock className="h-9 w-full" />
+              <SkeletonBlock className="h-16 w-full" />
+              <SkeletonBlock className="h-9 w-full" />
+            </div>
+          </section>
+        </div>
+        <section className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+          <SkeletonBlock className="h-4 w-36 mb-4" />
+          <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-5">
+            <div className="space-y-3">
+              <SkeletonBlock className="h-5 w-48" />
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-28 mb-3" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <SkeletonListItem key={i} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-28 mb-3" />
+                <div className="space-y-3">
+                  <SkeletonBlock className="h-9 w-full" />
+                  <SkeletonBlock className="h-14 w-full" />
+                  <SkeletonBlock className="h-9 w-full" />
+                </div>
+              </div>
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-36 mb-3" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <SkeletonListItem key={i} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -368,8 +446,36 @@ export default function Admin() {
             Select a project to manage members and assign work
           </div>
         ) : managing ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
+          <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-5">
+            <div className="space-y-4">
+              <SkeletonBlock className="h-5 w-48" />
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-28 mb-3" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <SkeletonListItem key={i} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-28 mb-3" />
+                <div className="space-y-3">
+                  <SkeletonBlock className="h-9 w-full" />
+                  <SkeletonBlock className="h-14 w-full" />
+                  <SkeletonBlock className="h-9 w-full" />
+                </div>
+              </div>
+              <div className="rounded-lg border border-[#e8e5e0] p-3">
+                <SkeletonBlock className="h-4 w-36 mb-3" />
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <SkeletonListItem key={i} />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-5">

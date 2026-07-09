@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getProjects } from '../services/api';
 import ProjectCard from '../components/ProjectCard';
 import { FolderKanban } from 'lucide-react';
+import { SkeletonBlock } from '../components/Skeleton';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -30,8 +31,20 @@ export default function Projects() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg border border-[#e8e5e0] p-4">
+                <SkeletonBlock className="h-4 w-3/4 mb-2" />
+                <SkeletonBlock className="h-3 w-full mb-1" />
+                <SkeletonBlock className="h-3 w-2/3 mb-3" />
+                <div className="flex gap-3">
+                  <SkeletonBlock className="h-3 w-16" />
+                  <SkeletonBlock className="h-3 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#bbb]">

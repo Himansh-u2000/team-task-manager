@@ -3,6 +3,7 @@ import { getMyTasks, updateTaskStatus } from '../services/api';
 import TaskCard from '../components/TaskCard';
 import { CheckSquare, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { SkeletonBlock } from '../components/Skeleton';
 
 export default function MyTasks() {
   const [tasks, setTasks] = useState([]);
@@ -78,8 +79,32 @@ export default function MyTasks() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-7 h-7 border-2 border-[#2d2d2d] border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-5">
+          <div>
+            <SkeletonBlock className="h-5 w-24 mb-1.5" />
+            <SkeletonBlock className="h-3.5 w-40" />
+          </div>
+          <div className="flex gap-2">
+            <SkeletonBlock className="h-8 w-28 rounded-md" />
+            <SkeletonBlock className="h-8 w-32 rounded-md" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-md border border-[#e8e5e0] p-3">
+                <div className="flex items-start gap-2 mb-2">
+                  <SkeletonBlock className="w-3 h-3 shrink-0 mt-0.5" />
+                  <SkeletonBlock className="h-3.5 flex-1" />
+                  <SkeletonBlock className="w-12 h-4 shrink-0 rounded" />
+                </div>
+                <SkeletonBlock className="h-2.5 w-32 mb-2 ml-5" />
+                <SkeletonBlock className="h-2 w-20 ml-5 mb-2" />
+                <div className="pl-5 pt-1 border-t border-[#f5f4f2] flex justify-between">
+                  <SkeletonBlock className="h-5 w-20 rounded" />
+                  <SkeletonBlock className="w-5 h-5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : tasks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#bbb]">
