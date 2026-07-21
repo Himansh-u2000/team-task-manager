@@ -1,0 +1,23 @@
+# SAM CLI deploy configuration.
+#
+# This file is regenerated/overwritten automatically the first time you
+# run `sam deploy --guided` (see steps.md) — the placeholder values below
+# just let you see the shape of it beforehand and get a head start.
+# Nothing here is secret: MONGODB_URI and JWT_SECRET are NOT parameters,
+# they're resolved from SSM Parameter Store directly inside template.yaml.
+
+version = 0.1
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+stack_name = "team-task-manager"
+region = "us-east-1"
+resolve_s3 = true
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+# Replace the ClientUrl value with your real CloudFront domain once you
+# have created the distribution (steps.md, "Creating CloudFront").
+parameter_overrides = "ClientUrl=\"https://REPLACE_WITH_YOUR_CLOUDFRONT_DOMAIN.cloudfront.net\""

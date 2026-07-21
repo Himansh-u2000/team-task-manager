@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+// VITE_API_URL is optional. Leave it unset when CloudFront proxies /api/*
+// to API Gateway under the same domain as the frontend (the recommended
+// setup, see steps.md) — the relative '/api' path then works in both dev
+// (via the Vite proxy in vite.config.js) and production (via CloudFront)
+// with zero cross-origin requests. Only set VITE_API_URL if you're
+// calling the API Gateway URL directly (e.g. testing before CloudFront
+// is configured), in which case it must be an absolute URL and the
+// backend's CLIENT_URL / CORS allow-list must match this app's origin.
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });

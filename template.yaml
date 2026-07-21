@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Team Task Manager — Express backend running as an AWS Lambda function
+  behind an HTTP API (API Gateway). MongoDB Atlas is the datastore; the
+  React frontend is deployed separately to S3 + CloudFront (see steps.md).
+
+# ── Parameters ──────────────────────────────────────────────────────────
+# Non-secret, per-environment values. Supplied interactively the first
+# time via `sam deploy --guided` (see steps.md), then remembered in
+# samconfig.toml for subsequent deploys.
+Parameters:
+  ClientUrl:
+    Type: String
+    Description: >
+      Public URL of the deployed frontend (your CloudFront domain, e.g.
+      https://d123456abcdef.cloudfront.net, no trailing slash). Used by
+      the Express `cors` middleware's allow-list.
+
+  JwtExpire:
+    Type: String
+    Default: 7d
+    Description: JWT token lifetime (jsonwebtoken "expiresIn" format).
+
+  JwtCookieExpireDays:
+    Type: String
+    Default: '7'
+    Description: How many days the auth cookie stays valid.
+
+# ── Global defaults applied to every AWS::Serverless::Function below ────
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
+    Timeout: 15
+    MemorySize: 256
+
+Resources:
+  TaskManagerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: server/
+      Handler: lambda.handler
+      Description: Express API for Team Task Manager (serverless-http)
+      Environment:
+        Variables:
+          NODE_ENV: production
+          CLIENT_URL: !Ref ClientUrl
+          JWT_EXPIRE: !Ref JwtExpire
+          JWT_COOKIE_EXPIRE_DAYS: !Ref JwtCookieExpireDays
+          # Resolved from SSM Parameter Store (SecureString) at deploy
+          # time — the actual secret values live only in Parameter Store,
+          # never in this file or in CloudFormation's stored parameters.
+          # The ":1" is the parameter VERSION — ssm-secure requires it
+          # explicitly (unlike plain "ssm", which can omit it).
+          MONGODB_URI: '{{resolve:ssm-secure:/team-task-manager/mongodb-uri:1}}'
+          JWT_SECRET: '{{resolve:ssm-secure:/team-task-manager/jwt-secret:1}}'
+      Events:
+        # No explicit AWS::Serverless::HttpApi resource is declared, so SAM
+        # creates one implicitly with the auto-deployed "$default" stage —
+        # meaning the invoke URL has NO stage path segment (see Outputs
+        # below). That keeps the URL that CloudFront proxies to simple.
+        ApiProxy:
+          Type: HttpApi
+          Properties:
+            Path: /api/{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiUrl:
+    Description: >
+      Invoke URL for the deployed API. Use this as the origin domain for
+      CloudFront's /api/* cache behavior.
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  FunctionName:
+    Description: Lambda function name (useful for `sam logs -n <name> --tail`)
+    Value: !Ref TaskManagerFunction
